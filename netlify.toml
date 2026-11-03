@@ -1,3 +1,4 @@
 [build]
+  base = "artifacts/3d-game"
   publish = "dist"
-  command = "npm run build --workspace=artifacts/3d-game"
+  command = "npm run build"
