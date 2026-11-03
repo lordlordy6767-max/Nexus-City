@@ -1,0 +1,4 @@
+[build]
+  base = "artifacts/3d-game"
+  command = "npm run build"
+  publish = "dist"
