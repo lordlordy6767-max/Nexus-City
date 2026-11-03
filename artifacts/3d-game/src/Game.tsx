@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { io, type Socket } from 'socket.io-client';
 import { useGetGameInfo } from '@workspace/api-client-react';
 import { Activity, CarFront, Heart, MapPin, MessageCircle, Send, Shield, Trophy, Wifi } from 'lucide-react';
+import { TouchJoystick } from './components/touch-joystick';
 
 type Player = {
   id: string; name: string; color: string; x: number; z: number; rotation: number;
@@ -17,6 +18,8 @@ type SceneProps = Snapshot & { localPlayerId: string | null; yaw: number };
 
 const EMPTY_SNAPSHOT: Snapshot = { players: [], cars: [], police: [] };
 const WORLD_EXTENT = 200;
+const STICK_DEADZONE = .3;
+const LOOK_SPEED = .09;
 const keyInput = { forward: false, backward: false, left: false, right: false, sprint: false, brake: false };
 
 function colorOf(color: string, fallback: string) {
@@ -574,6 +577,7 @@ export default function Game() {
   const socketRef = useRef<Socket | null>(null);
   const keyRef = useRef({ ...keyInput });
   const yawRef = useRef(0);
+  const lookRef = useRef(0);
   const mouseRef = useRef({ down: false, x: 0 });
   const localRef = useRef<Player | null>(null);
   const playersRef = useRef<Player[]>([]);
@@ -593,6 +597,7 @@ export default function Game() {
   const [yaw, setYaw] = useState(0);
   const [alert, setAlert] = useState('');
   const [mobileChatVisible, setMobileChatVisible] = useState(true);
+  const [isTouch] = useState(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches);
 
   const applySnapshot = useCallback((next: Snapshot, onlinePlayers?: number) => {
     playersRef.current = next.players || [];
@@ -642,6 +647,10 @@ export default function Game() {
 
   useEffect(() => {
     const timer = window.setInterval(() => {
+      if (lookRef.current) {
+        yawRef.current += lookRef.current * LOOK_SPEED;
+        setYaw(yawRef.current);
+      }
       if (!socketRef.current?.connected) return;
       const k = keyRef.current;
       socketRef.current.emit('playerInput', {
@@ -754,6 +763,18 @@ export default function Game() {
   };
   const onPointerUp = () => { mouseRef.current.down = false; };
 
+  const onMoveStick = useCallback((x: number, y: number) => {
+    const k = keyRef.current;
+    k.left = x < -STICK_DEADZONE;
+    k.right = x > STICK_DEADZONE;
+    k.forward = y < -STICK_DEADZONE;
+    k.backward = y > STICK_DEADZONE;
+  }, []);
+
+  const onLookStick = useCallback((x: number) => {
+    lookRef.current = Math.abs(x) < STICK_DEADZONE ? 0 : x;
+  }, []);
+
   const mapPoint = (value: number) => clampPercent(((value + WORLD_EXTENT) / (WORLD_EXTENT * 2)) * 100);
   const status = connected ? (hasSnapshot ? 'CITY LIVE' : 'SYNCING WORLD') : 'RECONNECTING';
   const isBooting = gameInfoQuery.isLoading && !gameInfo && !serverMessage;
@@ -854,6 +875,8 @@ export default function Game() {
           {!local?.carId && nearestCar && nearestCar.dist < 10 && <div className="enter-hint">{nearestCar.dist < 5.5 ? 'E · ENTER' : 'APPROACH VEHICLE'} — {nearestCar.car.id}</div>}
         </div>
         {alert && <div className="alert-banner">{alert}</div>}
+        {isTouch && <TouchJoystick side="left" label="Move" onChange={onMoveStick} />}
+        {isTouch && <TouchJoystick side="right" label="Look" onChange={(x) => onLookStick(x)} />}
       </div>
       {serverMessage && <div className="boot-screen"><div className="boot-card"><div className="boot-eyebrow">NEXUS CITY // NETWORK NOTICE</div><div className="boot-title">CITY AT CAPACITY</div><div className="boot-copy">{serverMessage}</div><button className="reconnect-button" onClick={() => { setServerMessage(''); socketRef.current?.connect(); }} data-testid="button-reconnect">RETRY CONNECTION</button></div></div>}
       {isBooting && <div className="boot-screen"><div className="boot-card"><div className="boot-eyebrow">NEXUS CITY ONLINE</div><div className="boot-title">FINDING<br />YOUR PLACE.</div><div className="boot-copy">Checking the city shard and preparing your connection.</div><div className="boot-progress"><span /></div></div></div>}

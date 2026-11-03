@@ -12,12 +12,12 @@ paths = [ "/" ]
 localPort = 24982
 
 [services.development]
-run = "pnpm --filter @workspace/3d-game run dev"
+run = "npm run dev --workspace=@workspace/3d-game"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/3d-game", "run", "build" ]
+build = [ "npm", "run", "build", "--workspace=@workspace/3d-game" ]
 serve = "static"
-publicDir = "artifacts/3d-game/dist/public"
+publicDir = "dist"
 
 [[services.production.rewrites]]
 from = "/*"

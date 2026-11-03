@@ -4,16 +4,16 @@ A low-poly multiplayer city sandbox where players explore, drive, chat, and comp
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080 in the managed workflow)
-- `pnpm --filter @workspace/3d-game run dev` — run the game client
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `npm run dev --workspace=@workspace/api-server` — run the API server (port 8080 in the managed workflow)
+- `npm run dev --workspace=@workspace/3d-game` — run the game client
+- `npm run typecheck` — full typecheck across all packages
+- `npm run build` — typecheck + build all packages
+- `npm run codegen --workspace=@workspace/api-spec` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `npm run push --workspace=@workspace/db` — push DB schema changes (dev only)
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
+- npm workspaces, Node.js 24, TypeScript 5.9
 - API and multiplayer: Express 5 + Socket.IO
 - Game client: React + Vite + Three.js r160
 - DB: PostgreSQL + Drizzle ORM

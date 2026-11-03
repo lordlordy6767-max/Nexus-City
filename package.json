@@ -3,12 +3,25 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "build": "npm run typecheck && npm run build --workspaces --if-present",
     "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "typecheck": "npm run typecheck:libs && npm run typecheck --workspaces --if-present"
   },
   "private": true,
+  "workspaces": [
+    "artifacts/*",
+    "lib/*",
+    "scripts"
+  ],
+  "overrides": {
+    "esbuild": "0.28.2",
+    "js-yaml": "4.3.2",
+    "proxy-addr": "^2.0.8",
+    "source-map-js": "^1.2.2",
+    "fast-uri": "^3.1.8",
+    "brace-expansion": "^5.0.12",
+    "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
+  },
   "dependencies": {
     "@replit/connectors-sdk": "^0.4.3"
   },
