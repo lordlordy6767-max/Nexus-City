@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "NEXUS CITY ONLINE"
+description = "A low-poly, real-time multiplayer city sandbox where players explore on foot, claim cars, race through the streets, chat, and compete in a shared open world."
+version = "1.0.0"
+id = "artifacts/3d-game"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24982
+
+[services.development]
+run = "pnpm --filter @workspace/3d-game run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/3d-game", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/3d-game/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24982"
+BASE_PATH = "/"

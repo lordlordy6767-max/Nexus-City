@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: game
+    description: Shared game server status
 paths:
   /healthz:
     get:
@@ -24,6 +26,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /game/info:
+    get:
+      operationId: getGameInfo
+      tags: [game]
+      summary: Get current multiplayer server status
+      responses:
+        "200":
+          description: Current game server status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameInfo"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +47,26 @@ components:
           type: string
       required:
         - status
+    GameInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        onlinePlayers:
+          type: integer
+        maxPlayers:
+          type: integer
+        availableCars:
+          type: integer
+        citySize:
+          type: integer
+        tickRate:
+          type: integer
+      required:
+        - name
+        - onlinePlayers
+        - maxPlayers
+        - availableCars
+        - citySize
+        - tickRate
 

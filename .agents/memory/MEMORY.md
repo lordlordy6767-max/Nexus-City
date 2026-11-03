@@ -1,0 +1,1 @@
+- [WebGL preview fallback](webgl-preview-fallback.md) — the preview capture browser cannot create WebGL contexts; retain a canvas fallback for reliable screenshots.

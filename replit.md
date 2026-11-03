@@ -1,20 +1,21 @@
-# [Project name]
+# NEXUS CITY ONLINE
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A low-poly multiplayer city sandbox where players explore, drive, chat, and compete in a shared 400 × 400 city.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080 in the managed workflow)
+- `pnpm --filter @workspace/3d-game run dev` — run the game client
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
+- API and multiplayer: Express 5 + Socket.IO
+- Game client: React + Vite + Three.js r160
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
@@ -22,15 +23,24 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/3d-game/src/Game.tsx` — city rendering, controls, multiplayer client, and HUD
+- `artifacts/3d-game/src/index.css` — game visual theme and responsive layout
+- `artifacts/api-server/src/lib/realtime-game.ts` — in-memory world state and Socket.IO gameplay
+- `artifacts/api-server/src/routes/game.ts` — multiplayer server status endpoint
+- `lib/api-spec/openapi.yaml` — HTTP API contract source of truth
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Keep the game UI in a web artifact and attach realtime play to the shared API server.
+- Use server-owned movement, car locks, hit resolution, and wanted state; clients render interpolated snapshots.
+- Keep this first version session-based and in memory; player stats reset when the API process restarts.
+- Send full world snapshots at 20 Hz so reconnecting clients can resynchronize without replaying missed events.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Players join as randomly colored characters, explore the city, claim one of five shared cars, chat, and shoot.
+- Players can see live health, cash, kills, wanted level, online count, police pursuit, and a minimap.
+- The 3D scene uses WebGL when available and falls back to a lightweight canvas scene when WebGL cannot start.
 
 ## User preferences
 
@@ -38,7 +48,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Keep `/api/socket.io` listed in the API artifact's routed paths; the proxy needs it for realtime connections.
+- The preview capture browser cannot create WebGL contexts. Its fallback scene is useful for previewing the HUD and multiplayer state but is not the full 3D renderer.
+- In-memory player and vehicle state is shared only while this API server process is running.
 
 ## Pointers
 
